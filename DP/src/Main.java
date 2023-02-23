@@ -3,7 +3,7 @@ import sun.nio.cs.ext.MacHebrew;
 public class Main {
     public static void main(String[] args) {
         // 凑够 n 分钱
-        int n = 19;
+        int n = 0;
         // 1.零钱兑换, 递归方式
         System.out.println("递归:" + coins1(n));
         System.out.println("======================");
@@ -14,7 +14,7 @@ public class Main {
         System.out.println("递推:" + coins3(n));
         System.out.println("======================");
         // 4.通用实现
-        System.out.println("通用实现:" + coins4(n, new int[] {1, 5, 20, 25}));
+        System.out.println("通用实现:" + coins4(n, new int[] {1}));
         System.out.println("======================");
     }
 
@@ -128,7 +128,7 @@ public class Main {
 
     static int coins4(int n, int[] faces) {
         if (n < 1 || faces == null || faces.length == 0) return -1;
-        int []dp = new int[n + 1];
+        int[] dp = new int[n + 1];
         for (int i = 1; i <= n; i++) {
             System.out.println("i = " + i);
             int min = Integer.MAX_VALUE;
@@ -138,11 +138,16 @@ public class Main {
                     System.out.println("(i = " + i + ") < (face = " + face + ") , continue! 跳出循环");
                     continue;
                 }
-                System.out.println("dp[" + i + " - " + face + "] = " + dp[i - face] + "; min =" + min);
-                min = Math.min(dp[i - face], min);
+                int v = dp[i - face];
+                if (v < 0 || v >= min) continue;
+                min = v;
                 System.out.println("min = " + min);
             }
-            dp[i] = min + 1;
+            if (min == Integer.MAX_VALUE) {
+                dp[i] = -1;
+            } else {
+                dp[i] = min + 1;
+            }
             System.out.println("dp[i]:   dp[" + i + "] =" + dp[i]);
         }
         System.out.println("dp[n]:   dp[" + n + "] = " + dp[n]);
