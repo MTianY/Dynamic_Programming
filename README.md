@@ -12,11 +12,52 @@
 
 ## 动态规划常规步骤
 
-1. 定义状态 (状态是原问题、子问题的解)
-2. 设置初始状态 (边界)
-3. 确定状态转移方程
+1.定义状态 (状态是原问题、子问题的解)
 
-### 练习 1. 找零钱. 零钱兑换
+- 如定义 `dp(i)` 的含义
+
+2.设置初始状态 (边界)
+
+- 如设置 `dp(0)` 的值
+
+3.确定状态转移方程
+
+- 如确定 `dp(i)` 和 `dp(i-1)` 的关系
+
+## 动态规划概念
+
+- 将复杂的原问题拆解成若干个简单的子问题
+- 每个子问题仅仅解决 1 次, 并保存它们的解
+- 最后推到出原问题的解
+
+可以用动态规划来解决的问题, 通常具备 2 个特点:
+
+- 最优子结构(最优化原理): 通过求解子问题的最优解, 可以获得原问题的最优解
+- 无后效性
+    - 某阶段的状态一旦确定, 则此后过程的演变不再受此前各状态及决策的影响(未来与过去无关)
+    - 在推到后面阶段的状态时,只关系前面阶段的具体状态值,不关系这个状态是怎么一步步推到出来的 
+
+#### 无后效性示例:
+
+从起点 (0,0) 走到终点 (4,4) 一共有多少种走法? 只能向右, 向下走.
+
+| (0,0) |  |  |  |  |
+| :-: | :-: | :-: | :-: | :-: |
+|  |  | (i,j-1) |  |  |
+|  | (i-1,j) | (i,j) |  |  |
+|  |  |  |  |  |
+|  |  |  |  | (4,4) |
+
+假设 `dp(i,j)` 是从 (0,0) 走到 (i,j) 的走法.
+
+- dp(i,0) = dp(0,j) = 1;
+- dp(i,j) = dp(i,j-1) + dp(i-1,j);
+
+无后效性:
+- 推到 dp(i,j) 时只需要用到 dp(i,j-1). dp(i-1,j) 的值.
+- 不需要关心 dp(i,j-1), dp(i-1,j)的值是怎么求出来的
+
+## 练习 1. 找零钱. 零钱兑换
 
 假设有 25 分, 20 分,5 分,1 分的硬币, 要找给客户 41 分的零钱, 如何办到硬币个数`最少`.
 
@@ -158,7 +199,7 @@ static void print(int[] faces, int n) {
 
 static int coins4(int n, int[] faces) {
    if (n < 1 || faces == null || faces.length == 0) return -1;
-   int []dp = new int[n + 1];
+   int[] dp = new int[n + 1];
    for (int i = 1; i <= n; i++) {
        System.out.println("i = " + i);
        int min = Integer.MAX_VALUE;
@@ -168,11 +209,16 @@ static int coins4(int n, int[] faces) {
                System.out.println("(i = " + i + ") < (face = " + face + ") , continue! 跳出循环");
                continue;
            }
-           System.out.println("dp[" + i + " - " + face + "] = " + dp[i - face] + "; min =" + min);
-           min = Math.min(dp[i - face], min);
+           int v = dp[i - face];
+           if (v < 0 || v >= min) continue;
+           min = v;
            System.out.println("min = " + min);
        }
-       dp[i] = min + 1;
+       if (min == Integer.MAX_VALUE) {
+           dp[i] = -1;
+       } else {
+           dp[i] = min + 1;
+       }
        System.out.println("dp[i]:   dp[" + i + "] =" + dp[i]);
    }
    System.out.println("dp[n]:   dp[" + n + "] = " + dp[n]);
@@ -180,8 +226,81 @@ static int coins4(int n, int[] faces) {
 }
 ```
 
+### 练习 2: 求最大子序列的和.
 
+给定一个长度为 n 的整数序列, 求它的最大连续子序列的和.
+如 -2, 1, -3, 4, -1, 2, 1, -5, 4 的最大连续子序列和是 4 + (-1) + 2 + 1 = 6
 
+1.状态定义:
+假设 dp(i) 是以 nums[i] 结尾的最大连续子序列和 (nums 是整个序列),
+-2 结尾最大和 dp(0) = -2.
+1 结尾则 dp(1) = 1.
+...
 
+2.状态转移方程:
+所以求 dp(i), 参考前一个的和, dp(i-1),如果 dp(i-1)<0,那么就不需要加上 dp(i-1)的和
+即:
+```java
+if (dp(i-1) <= 0) {
+    // 不要 i-1 的和, 那么 dp[i]就和 i 位置元素一样
+    dp[i] = nums[i];
+    } else {
+    // 前 i-1 的和加上 i 位置元素的和
+    dp[i] = dp[i-1] + nums[i];
+}
+```
+
+3.初始状态:
+dp(0) = nums[0]
+
+4.最终推导出最终解:
+最大连续子序列和是所有 dp(i)中最大值 `max{dp(i)}`, i∈[0,nums.length);
+
+实现方案 1:
+
+```java
+static int maxSubArray(int[] nums) {
+   if (nums == null || nums.length == 0) return 0;
+   // 以 nums[i] 结尾的最大连续子序列和
+   int[] dp = new int[nums.length];
+   dp[0] = nums[0];
+   int max = dp[0];
+   System.out.println("dp[0] = " + dp[0]);
+   for (int i = 1; i < nums.length; i++) {
+       if (dp[i - 1] <= 0) {
+           dp[i] = nums[i];
+       } else {
+           dp[i] = dp[i - 1] + nums[i];
+       }
+       max = Math.max(dp[i], max);
+       System.out.println("dp[" + i + "] = " + dp[i]);
+   }
+   return max;
+}
+```
+
+实现方案 2: (基于 1 的优化)
+
+```java
+// 优化, 去掉数组
+// {-2,1,-3,4,-1,2,1,-5,4}
+static int maxSubArray2(int[] nums) {
+   if (nums == null || nums.length == 0) return 0;
+   int dp = nums[0];
+   int max = dp;
+   for (int i = 1; i < nums.length; i++) {
+       System.out.print("i = " + i + "; dp = " + dp);
+       if (dp <= 0) {
+           dp = nums[i];
+       } else {
+           dp = dp + nums[i];
+       }
+       System.out.print(";  dp = " + dp);
+       System.out.println();
+       max = Math.max(dp, max);
+   }
+   return max;
+}
+```
 
 

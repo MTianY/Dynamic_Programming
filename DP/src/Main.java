@@ -5,17 +5,21 @@ public class Main {
         // 凑够 n 分钱
         int n = 0;
         // 1.零钱兑换, 递归方式
-        System.out.println("递归:" + coins1(n));
-        System.out.println("======================");
+//        System.out.println("递归:" + coins1(n));
+//        System.out.println("======================");
         // 2.优化 1: 记忆化搜索
-        System.out.println("记忆化搜索:" + coins2(n));
-        System.out.println("======================");
-        // 3.优化 2: 递推
-        System.out.println("递推:" + coins3(n));
-        System.out.println("======================");
+//        System.out.println("记忆化搜索:" + coins2(n));
+//        System.out.println("======================");
+//         3.优化 2: 递推
+//        System.out.println("递推:" + coins3(n));
+//        System.out.println("======================");
         // 4.通用实现
-        System.out.println("通用实现:" + coins4(n, new int[] {1}));
+//        System.out.println("通用实现:" + coins4(n, new int[] {1}));
         System.out.println("======================");
+
+        // 最大连续子序列和
+        System.out.println(maxSubArray(new int[]{-2,1,-3,4,-1,2,1,-5,4}));
+        System.out.println(maxSubArray2(new int[]{-2,1,-3,4,-1,2,1,-5,4}));
     }
 
     /**
@@ -152,6 +156,78 @@ public class Main {
         }
         System.out.println("dp[n]:   dp[" + n + "] = " + dp[n]);
         return dp[n];
+    }
+
+    /**
+     * 练习 2 - 最大连续子序列的和.
+     *
+     * 给定一个长度为 n 的整数序列, 求它的最大连续子序列的和.
+     * 如 -2, 1, -3, 4, -1, 2, 1, -5, 4 的最大连续子序列和是 4 + (-1) + 2 + 1 = 6
+     */
+
+    /**
+     * 状态定义:
+     * 假设 dp(i) 是以 nums[i] 结尾的最大连续子序列和 (nums 是整个序列)
+     * -2 结尾最大和 dp(0) = -2
+     * 1 结尾则 dp(1) = 1
+     * ...
+     *
+     * 状态转移方程
+     * 所以求 dp(i), 参考前一个的和, dp(i-1),如果 dp(i-1)<0,那么就不需要加上 dp(i-1)的和
+     * 即:
+     * if (dp(i-1) <= 0) {
+     *      // 不要 i-1 的和, 那么 dp[i]就和 i 位置元素一样
+     *     dp[i] = nums[i];
+     * } else {
+     *      // 前 i-1 的和加上 i 位置元素的和
+     *     dp[i] = dp[i-1] + nums[i];
+     * }
+     *
+     *
+     * 初始状态:
+     * dp(0) = nums[0];
+     *
+     * 推导出最终解:
+     * 最大连续子序列和是所有 dp(i)中最大值 max{dp(i)}, i∈[0,nums.length);
+      */
+
+    static int maxSubArray(int[] nums) {
+        if (nums == null || nums.length == 0) return 0;
+        // 以 nums[i] 结尾的最大连续子序列和
+        int[] dp = new int[nums.length];
+        dp[0] = nums[0];
+        int max = dp[0];
+        System.out.println("dp[0] = " + dp[0]);
+        for (int i = 1; i < nums.length; i++) {
+            if (dp[i - 1] <= 0) {
+                dp[i] = nums[i];
+            } else {
+                dp[i] = dp[i - 1] + nums[i];
+            }
+            max = Math.max(dp[i], max);
+            System.out.println("dp[" + i + "] = " + dp[i]);
+        }
+        return max;
+    }
+
+    // 优化, 去掉数组
+    // {-2,1,-3,4,-1,2,1,-5,4}
+    static int maxSubArray2(int[] nums) {
+        if (nums == null || nums.length == 0) return 0;
+        int dp = nums[0];
+        int max = dp;
+        for (int i = 1; i < nums.length; i++) {
+            System.out.print("i = " + i + "; dp = " + dp);
+            if (dp <= 0) {
+                dp = nums[i];
+            } else {
+                dp = dp + nums[i];
+            }
+            System.out.print(";  dp = " + dp);
+            System.out.println();
+            max = Math.max(dp, max);
+        }
+        return max;
     }
 
 }
