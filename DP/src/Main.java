@@ -18,8 +18,11 @@ public class Main {
         System.out.println("======================");
 
         // 最大连续子序列和
-        System.out.println(maxSubArray(new int[]{-2,1,-3,4,-1,2,1,-5,4}));
-        System.out.println(maxSubArray2(new int[]{-2,1,-3,4,-1,2,1,-5,4}));
+//        System.out.println(maxSubArray(new int[]{-2,1,-3,4,-1,2,1,-5,4}));
+//        System.out.println(maxSubArray2(new int[]{-2,1,-3,4,-1,2,1,-5,4}));
+
+        // LIS 最长上升子序列
+        System.out.println(lenghtOfLIS(new int[]{0,1,0,3,2,3}));
     }
 
     /**
@@ -226,6 +229,30 @@ public class Main {
             System.out.print(";  dp = " + dp);
             System.out.println();
             max = Math.max(dp, max);
+        }
+        return max;
+    }
+
+    // 最长上升子序列 LIS
+    // [0,1,0,3,2,3]
+    static int lenghtOfLIS(int[] nums) {
+        if (nums == null || nums.length == 0) return 0;
+        int[] dp = new int[nums.length];
+        int max = dp[0] = 1;
+        for (int i = 1; i < nums.length; i++) {
+            System.out.println("i = " + i);
+            // 初始值为 1
+            dp[i] = 1;
+            for (int j = 0; j < i; j++) {
+                System.out.println("j = " + j);
+                // 后面的比前面的小, 直接略过
+                if (nums[i] <= nums[j]) continue;
+                // nums[i] 比 nums[j] 的值大, 则加到 dp[j] 的后面, 加 1
+                dp[i] = Math.max(dp[i], dp[j] + 1);
+                System.out.println("dp[i]; dp[" + i + "] = " + dp[i]);
+            }
+            max = Math.max(dp[i], max);
+            System.out.println("max = " + max);
         }
         return max;
     }

@@ -303,4 +303,49 @@ static int maxSubArray2(int[] nums) {
 }
 ```
 
+### 练习 3: 最长上升子序列 (LIS)
+
+给定一个无序的整数序列, 求出它的最长上升子序列的长度(要求严格上升)
+- 如 [10,2,2,5,1,7,101,19]的最长上升子序列是[2,5,7,101] . [2,5,7,19], 长度是 4.
+
+**1.状态定义**
+dp(i) 最长上升子序列的长度. 以 nums[i] 为结尾. 
+**2.初始值**
+初始值为 1, 范围 i ∈ [0, nums.length)
+**3.状态转移方程**
+假设 j 为 i 的前面元素. 遍历 j∈ [0,i)
+当 nums[i] > nums[j] (后面元素比前面的大, 则总长度就是前面的长度加上 i 位置元素)
+
+- nums[i] 可以接着 nums[j]后面, 形成一个比 dp(j) 更长的上升子序列, 长度为 dp(j) + 1
+- dp(i) = max{dp(i), dp(j)+1}
+
+当 nums[i] <= nums[j]
+
+- nums[i] 不能接在 nums[j] 后面, 跳过此次遍历 (continue)
+
+```java
+// 最长上升子序列 LIS
+// [0,1,0,3,2,3]
+static int lenghtOfLIS(int[] nums) {
+   if (nums == null || nums.length == 0) return 0;
+   int[] dp = new int[nums.length];
+   int max = dp[0] = 1;
+   for (int i = 1; i < nums.length; i++) {
+       System.out.println("i = " + i);
+       // 初始值为 1
+       dp[i] = 1;
+       for (int j = 0; j < i; j++) {
+           System.out.println("j = " + j);
+           // 后面的比前面的小, 直接略过
+           if (nums[i] <= nums[j]) continue;
+           // nums[i] 比 nums[j] 的值大, 则加到 dp[j] 的后面, 加 1
+           dp[i] = Math.max(dp[i], dp[j] + 1);
+           System.out.println("dp[i]; dp[" + i + "] = " + dp[i]);
+       }
+       max = Math.max(dp[i], max);
+       System.out.println("max = " + max);
+   }
+   return max;
+}
+```
 
