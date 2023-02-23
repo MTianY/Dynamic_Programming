@@ -349,3 +349,66 @@ static int lenghtOfLIS(int[] nums) {
 }
 ```
 
+### 练习 4. 最长公共子序列 (LCS - Longest Common Subsequence)
+
+求两个序列的最长公共子序列长度.
+
+- 如 [1, 3, 5, 9, 10] 和 [1, 4, 9, 10] 的最长公共子序列是 [1, 9, 10]. 长度为 3.
+- 如 ABCBDAB 和 BDCABA 最长公共子序列长度是 4
+
+**思路:**
+
+- 假设 2 个序列分别是 `nums1`, `nums2`.
+    - i ∈ [0, nums1.length]
+    - j ∈ [0, nums2.length]
+
+- 假设 `dp(i, j)` 是 `nums1 前 i 个元素` 与 `nums2 前 j 个元素` 的最长公共子序列长度.
+- 初始值 dp(i,0) , dp(0,j) 都是 0;
+- 前 i 个元素, 最后一个元素下标则是 i - 1, 如果 nums[i - 1] = nums2[j - 1], 即最后一个元素相等, 那么用前一个的长度加 1 即可,那么 dp(i, j) = dp(i - 1, j - 1) + 1;
+- 如果最后一个元素不等, 那么取前 i-1 个元素和前 j 个元素值, 和前 i 个元素和前 j-1 个元素两者的最大值 ,如果 nums[i - 1] ≠ nums2[j - 1], 那么 dp(i, j) = max {dp(i-1,j), dp(i,j-1)}  
+
+
+递归方式实现:
+
+```java
+ /**
+    * 递归方式:
+    * 空间复杂度: O(k), k = min{n, m}. n,m是 2 个序列的长度.
+    * 时间复杂度: O(2^n). 当 n = m 时
+    */
+        
+    static int lcs(int[] nums1, int[] nums2) {
+      if (nums1 == null || nums1.length == 0) return 0;
+      if (nums2 == null || nums2.length == 0) return 0;
+      return lcs(nums1, nums1.length, nums2, nums2.length);
+    }
+        
+    static int lcs(int[] nums1, int i, int[] nums2, int j) {
+      if (i == 0 || j == 0) return 0;
+      if (nums1[i - 1] == nums2[j - 1]) {
+          return lcs(nums1, i - 1, nums2, j - 1) + 1;
+      }
+      return Math.max(lcs(nums1, i - 1, nums2, j), lcs(nums1, i, nums2, j - 1));
+    }
+```
+
+非递归方式实现:
+
+```java
+static int lcs2(int[] nums1, int[] nums2) {
+   if (nums1 == null || nums1.length == 0) return 0;
+   if (nums2 == null || nums2.length == 0) return 0;
+   int[][] dp = new int[nums1.length + 1][nums2.length + 1];
+   for (int i = 1; i <= nums1.length ; i++) {
+       for (int j = 1; j <= nums2.length; j++) {
+           if (nums1[i - 1] == nums2[j - 1]) {
+               dp[i][j] = dp[i - 1][j - 1] + 1;
+           } else {
+               dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+           }
+       }
+   }
+   return dp[nums1.length][nums2.length];
+}
+```
+

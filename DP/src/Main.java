@@ -22,7 +22,13 @@ public class Main {
 //        System.out.println(maxSubArray2(new int[]{-2,1,-3,4,-1,2,1,-5,4}));
 
         // LIS 最长上升子序列
-        System.out.println(lenghtOfLIS(new int[]{0,1,0,3,2,3}));
+//        System.out.println(lenghtOfLIS(new int[]{0,1,0,3,2,3}));
+
+        // LCS 最长公共子序列
+        int[] lcsnums1 = new int[]{1,3,5,9,10};
+        int[] lcsnums2 = new int[]{1,4,9,10};
+        System.out.println(lcs(lcsnums1, lcsnums2));
+        System.out.println(lcs2(lcsnums1, lcsnums2));
     }
 
     /**
@@ -256,5 +262,51 @@ public class Main {
         }
         return max;
     }
+
+    /**
+     * 练习 4: 最长公共子序列, LCS
+     */
+
+    /**
+     * 递归方式:
+     * 空间复杂度: O(k), k = min{n, m}. n,m是 2 个序列的长度.
+     * 时间复杂度: O(2^n). 当 n = m 时
+      */
+
+    static int lcs(int[] nums1, int[] nums2) {
+        if (nums1 == null || nums1.length == 0) return 0;
+        if (nums2 == null || nums2.length == 0) return 0;
+        return lcs(nums1, nums1.length, nums2, nums2.length);
+    }
+
+    static int lcs(int[] nums1, int i, int[] nums2, int j) {
+        if (i == 0 || j == 0) return 0;
+        if (nums1[i - 1] == nums2[j - 1]) {
+            return lcs(nums1, i - 1, nums2, j - 1) + 1;
+        }
+        return Math.max(lcs(nums1, i - 1, nums2, j), lcs(nums1, i, nums2, j - 1));
+    }
+
+    /**
+     * 非递归实现
+     */
+    
+    static int lcs2(int[] nums1, int[] nums2) {
+        if (nums1 == null || nums1.length == 0) return 0;
+        if (nums2 == null || nums2.length == 0) return 0;
+        int[][] dp = new int[nums1.length + 1][nums2.length + 1];
+        for (int i = 1; i <= nums1.length ; i++) {
+            for (int j = 1; j <= nums2.length; j++) {
+                if (nums1[i - 1] == nums2[j - 1]) {
+                    dp[i][j] = dp[i - 1][j - 1] + 1;
+                } else {
+                    dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+                }
+            }
+        }
+        return dp[nums1.length][nums2.length];
+    }
+
+
 
 }
