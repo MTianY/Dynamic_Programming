@@ -412,3 +412,143 @@ static int lcs2(int[] nums1, int[] nums2) {
 }
 ```
 
+滚动数组:
+
+```java
+static int lcs3(int[] nums1, int[] nums2) {
+   if (nums1 == null || nums1.length == 0) return 0;
+   if (nums2 == null || nums2.length == 0) return 0;
+   int[][] dp = new int[2][nums2.length + 1];
+   for (int i = 1; i <= nums1.length; i++) {
+       int row = i & 1;
+       int prevRow = (i - 1) & 1;
+       for (int j = 1; j <= nums2.length; j++) {
+           if (nums1[i - 1] == nums2[j - 1]) {
+               dp[row][j] = dp[prevRow][j - 1] + 1;
+           } else {
+               dp[row][j] = Math.max(dp[prevRow][j], dp[row][j - 1]);
+           }
+       }
+   }
+   return dp[nums1.length & 1][nums2.length];
+}
+```
+
+一维数组:
+
+```java
+/**
+ * 一维数组
+ * 后面算出来的值要覆盖之前的值.
+ * 如果 i 和 j 位置元素不相等, 假设此时一位数组元素存储的是, 前 j 个是后面新算出来覆盖后的元素, j 开始还是之前的元素.
+ * 所有 i 和 j 位置元素不相等, 求 j 位置元素则是,dp(j)和dp(j-1)较大者
+ * 如果 i 和 j 位置元素相等, 那么取左上角元素加 1, 但是左上角之前的元素已经被覆盖掉了, 取遍历 cur 记录. cur 默认为 0.
+ * 因为最开始左上角元素都是 0.遍历 j 时,存 cur = dp[j]
+*/
+
+static int lcs4(int[] nums1, int[] nums2) {
+   if (nums1 == null || nums1.length == 0) return 0;
+   if (nums2 == null || nums2.length == 0) return 0;
+   int[] dp = new int[nums2.length + 1];
+   for (int i = 1; i <= nums1.length; i++) {
+       int cur = 0;
+       for (int j = 1; j <= nums2.length; j++) {
+           int leftTop = cur;
+           cur = dp[j];
+           if (nums1[i - 1] == nums2[j - 1]) {
+               dp[j] = leftTop + 1;
+           } else {
+               dp[j] = Math.max(dp[j], dp[j - 1]);
+           }
+       }
+   }
+   return dp[nums2.length];
+}
+```
+
+一维数组长度优化:
+
+```java
+static int lcs5(int[] nums1, int[] nums2) {
+   if (nums1 == null || nums1.length == 0) return 0;
+   if (nums2 == null || nums2.length == 0) return 0;
+   int[] rowsNums = nums1, colsNums = nums2;
+   // 取长度最短的作为列, 优化一维数组长度
+   if (nums1.length < nums2.length) {
+       colsNums = nums1;
+       rowsNums = nums2;
+   }
+   int[] dp = new int[colsNums.length + 1];
+   for (int i = 1; i <= rowsNums.length; i++) {
+       int cur = 0;
+       for (int j = 1; j <= colsNums.length; j++) {
+           int leftTop = cur;
+           cur = dp[j];
+           if (rowsNums[i - 1] == colsNums[j - 1]) {
+               dp[j] = leftTop + 1;
+           } else {
+               dp[j] = Math.max(dp[j], dp[j - 1]);
+           }
+       }
+   }
+   return dp[colsNums.length];
+}
+```
+
+leetcode 题:
+
+```java
+public int longestCommonSubsequence(String text1, String text2) {
+   if (text1 == null || text2 == null) return 0;
+   char[] chars1 = text1.toCharArray();
+   if (chars1.length == 0) return 0;
+   char[] chars2 = text2.toCharArray();
+   if (chars2.length == 0) return 0;
+
+   char[] rowChars = chars1, colsChars = chars2;
+   if (chars1.length < chars2.length) {
+       colsChars = chars1;
+       rowChars = chars2;
+   }
+   int[] dp = new int[colsChars.length + 1];
+   for (int i = 1; i <= rowChars.length; i++) {
+       int cur = 0;
+       for (int j = 1; j <= colsChars.length; j++) {
+           int leftTop = cur;
+           cur = dp[j];
+           if (rowChars[i - 1] == colsChars[j - 1]) {
+               dp[j] = leftTop + 1;
+           } else {
+               dp[j] = Math.max(dp[j], dp[j - 1]);
+           }
+       }
+   }
+   return dp[colsChars.length];
+}
+
+public int longestCommonSubsequence2(String text1, String text2) {
+   if (text1 == null || text2 == null) return 0;
+   char[] chars1 = text1.toCharArray();
+   if (chars1.length == 0) return 0;
+   char[] chars2 = text2.toCharArray();
+   if (chars2.length == 0) return 0;
+
+   int[] dp = new int[chars2.length + 1];
+
+   for (int i = 1; i <= chars1.length; i++) {
+       int cur = 0;
+       for (int j = 1; j <= chars2.length; j++) {
+           int leftTop = cur;
+           cur = dp[j];
+           if (chars1[i - 1] == chars2[j - 1]) {
+               dp[j] = leftTop + 1;
+           } else {
+               dp[j] = Math.max(dp[j], dp[j - 1]);
+           }
+       }
+   }
+   return dp[chars2.length];
+}
+```
+
+
