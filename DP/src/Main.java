@@ -267,6 +267,51 @@ public class Main {
         return max;
     }
 
+    // 二分搜索实现, 空间复杂度 O(n), 时间复杂度可优化至 O(logn)
+
+    /**
+     * 10, 2, 2, 5, 1, 7, 101, 18
+     * 把每个数字看做是一张扑克牌, 从左到右按顺序处理每一个扑克牌.
+     * 从左至右数, 如果第一个牌顶牌大于它, 则盖到该牌顶, 否则下一个继续按此逻辑盖上去
+     * 如果找不到能盖的牌顶, 在最右边新建一个牌堆, 放入
+     *
+     * 10   5   7   101
+     * 2            18
+     * 2
+     * 1
+     *
+     * 处理完所有牌, 最终牌堆的数量就是最长上升子序列的长度. 2,5,7,101. 2,5,7,18
+     */
+
+    static int lengthOfLIS(int[] nums) {
+        if (nums == null || nums.length == 0) return 0;
+        // 牌堆的数量
+        int len = 0;
+        // 牌顶数组
+        int[] top = new int[nums.length];
+        // 遍历所有牌
+        for (int num : nums) {
+            int j = 0;
+            while (j < len) {
+                // 找到一个 >= num 的牌顶
+                if (top[j] >= num) {
+                    top[j] = num;
+                    break;
+                }
+                // 牌顶 < num
+                j++;
+            }
+            if (j == len) {
+                // 新建一个牌堆
+                len++;
+                top[j] = num;
+            }
+        }
+        return len;
+    }
+
+
+
     /**
      * 练习 4: 最长公共子序列, LCS
      */
@@ -438,5 +483,108 @@ public class Main {
         return dp[chars2.length];
     }
 
+    /**
+     * 最长公共子串 Longest Common Substring
+     * 子串是连续的子序列
+     *
+     *
+     * 求两个字符串的最长公共子串长度
+     * ABCBA 和 BABCA 的最长公共子串是 ABC, 长度为 3
+     */
 
+    static int LCSubstring(String str1, String str2) {
+        if (str1 == null || str2 == null) return 0;
+        char[] chars1 = str1.toCharArray();
+        if (chars1.length == 0) return 0;
+        char[] chars2 = str2.toCharArray();
+        if (chars2.length == 0) return 0;
+
+        int[][] dp = new int[chars1.length + 1][chars2.length + 1];
+        int max = 0;
+        for (int i = 1; i <= chars1.length; i++) {
+            for (int j = 1; j <= chars2.length; j++) {
+                if (chars1[i - 1] != chars2[i - 1]) continue;
+                // 相等, 公共子串至少为 1. 此时看前一个的子串长度
+                dp[i][j] = dp[i - 1][j - 1] + 1;
+                max = Math.max(dp[i][j], max);
+            }
+        }
+        return max;
+    }
+
+    /**
+     * 0-1 背包
+     *
+     * n 件物品和一个最大承重为 W 的背包, 每件物品的重量是 Wi, 价值是 Vi.
+     * 保证总重量不超过 W 的前提下, 选择某些物品装入背包, 背包的最大总价值是多少?
+     * 注意: 每个物品只有 1 件, 也就是每个物品只能选择 0 件或者 1 件.
+     */
+
+    /**
+     * dp(i,j) 是最大承重为 j, 有前 i 件物品可选择值的最大价值
+     *
+     * int[] values; 价值
+     * int[] weights; 重量
+     * int capacity 最大承重
+     * 如果最大承重小于某个物品的重量,那么就没必要把这个物品放进去, 所以 dp(i,j) 和 dp(i-1,j) 一个意思. j < weights[i], dp(i,j) = dp(i-1, j);
+     * 最后一件不选的话, 那么 dp(i,j) 和 dp(i-1, j) 相同
+     * 如果选择最后一件的话,values[i-1]是去掉最后一件的价值, weights[i-1]去掉最后一件的重量,那么 dp(i,j) = values[i-1] + dp(i-1, j - weights[i-1]);
+     * 所以两个当中最大的就是 dp(i,j)的值
+     * dp(i,j) = max {dp(i-1,j), values[i] + dp(i-1,j-weights[i])};
+     */
+
+    static int maxValue(int[] values, int[] weights, int capacity) {
+        if (values == null || values.length == 0) return 0;
+        if (weights == null || weights.length == 0) return 0;
+        if (values.length != weights.length || capacity <= 0) return 0;
+        int[][] dp = new int[values.length + 1][capacity + 1];
+        for (int i = 1; i <= values.length; i++) {
+            for (int j = 1; j <= capacity; j++) {
+                if (j < weights[i - 1]) {
+                    dp[i][j] = dp[i - 1][j];
+                } else {
+                    dp[i][j] = Math.max(
+                            dp[i-1][j],
+                            values[i - 1] + dp[i - 1][j - weights[i - 1]]
+                    );
+                }
+            }
+        }
+        return dp[values.length][capacity];
+    }
+
+    // 背包: 一维数组实现方案.
+    static int maxValue2(int[] values, int[] weights, int capacity) {
+        if (values == null || values.length == 0) return 0;
+        if (weights == null || weights.length == 0) return 0;
+        if (values.length != weights.length || capacity <= 0) return 0;
+        int[] dp = new int[capacity + 1];
+        for (int i = 1; i < values.length; i++) {
+            for (int j = capacity; j >= 1; j--) {
+                if (j < weights[i - 1]) continue;
+                dp[j] = Math.max(dp[j], values[i - 1] + dp[j - weights[i - 1]]);
+            }
+        }
+        return dp[capacity];
+    }
+
+    // 背包; 恰好装满的情况.
+    static int maxValue3(int[] values, int[] weights, int capacity) {
+        if (values == null || values.length == 0) return 0;
+        if (weights == null || weights.length == 0) return 0;
+        if (values.length != weights.length || capacity <= 0) return 0;
+        int[] dp = new int[capacity + 1];
+        // 初始值变成负无穷大
+        for (int j = 1; j <= capacity; j++) {
+            dp[j] = Integer.MIN_VALUE;
+        }
+        for (int i = 1; i < values.length; i++) {
+            for (int j = capacity; j >= 1; j--) {
+                if (j < weights[i - 1]) continue;
+                dp[j] = Math.max(dp[j], values[i - 1] + dp[j - weights[i - 1]]);
+            }
+        }
+        // -1 表示不能恰好装满
+        return dp[capacity] < 0 ? -1 : dp[capacity];
+    }
 }
